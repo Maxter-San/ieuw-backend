@@ -16,5 +16,13 @@ model Product {
   photo       String @default("")
 }
 
+model User {
+  id Int    @id @default(autoincrement())
+  name String
+  lastName String
+  password String
+  email String @unique
+}
+
 
 //npx prisma format
