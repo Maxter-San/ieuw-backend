@@ -1,0 +1,5 @@
+- [x] Detalle de producto
+- [x] Contador de visitas
+- [x] login
+- [x] sign up
+- [x] productos mas vendidos

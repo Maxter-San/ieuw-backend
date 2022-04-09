@@ -33,7 +33,7 @@ app.get("/product/:productId", async (req, res) => {
   res.send(product);
 })
 
-app.post("/users", async (req, res) => {
+app.post("/sign-up", async (req, res) => {
   try {
     const user = await prisma.user.create({
       data: {
@@ -82,5 +82,5 @@ app.post("/product-view", async (req, res) => {
 })
 
 app.listen(3000, () => {
-  console.log("si");
+  console.log("No >:v");
 });
