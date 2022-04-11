@@ -3,3 +3,5 @@
 - [x] login
 - [x] sign up
 - [x] productos mas vendidos
+- [ ] autologin
+- [  ] cart carrito de compras

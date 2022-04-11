@@ -24,6 +24,47 @@ app.get("/products", async (req, res) => {
   res.send(products);
 })
 
+app.post("/productsViewed", async (req, res) => {
+  try{
+    //const limit = Number(req.query.limit) || undefined;
+
+    const products = await prisma.product.findMany({
+      orderBy: {
+        id: 'desc',
+      },
+      take: 3,
+      where: {
+        viewedProducts: {
+          some: {
+            user: {
+              id: Number(req.body.userId),
+            }
+          },
+        },
+      },
+    });
+    res.send(products);
+  }
+  catch{
+    res.status(500).send({ error: true });
+  }
+})
+
+app.post("/productViewed", async (req, res) => {
+  try{
+    const product = await prisma.product.findMany({
+      where: {
+        id: Number(req.body.productId),
+      },
+    });
+
+    res.send(product);
+  }
+  catch{
+    res.status(500).send({ error: true });
+  }
+})
+
 app.get("/product/:productId", async (req, res) => {
   const product = await prisma.product.findFirst({
     where:{
@@ -44,6 +85,7 @@ app.post("/sign-up", async (req, res) => {
       },
       include: {
         userCart: true,
+        viewedProducts: true,
       }
     });
 
@@ -77,6 +119,8 @@ app.post("/sign-up", async (req, res) => {
   }
 })
 
+//crud patch
+
 app.post("/login", async (req, res) => {
   try{
     const user = await prisma.user.findFirst({
@@ -108,13 +152,42 @@ app.post("/product-view", async (req, res) => {
       data: {
         views: {increment: 1}
       }
-    })
+    });
   
     res.send({ ok: true });
   } catch {
     res.status(500).send({ error: true });
   }
 })
+
+app.post("/product-last-viewed", async (req, res) => {
+  try {
+    // await prisma.user.update({
+    //   where:{
+    //     id: Number(req.body.userId),
+    //   },
+    //   data: {
+    //     productId: Number(req.body.productId),
+    //   }
+    // });
+    
+    await prisma.viewedProducts.create({
+      data:{
+        productId: Number(req.body.productId),
+        userId: Number(req.body.userId),
+      },
+      include: {
+        product: true,
+        user: true,
+      }
+    });
+  
+    res.send({ ok: true });
+  } catch {
+    res.status(500).send({ error: true });
+  }
+})
+
 
 // esto es un endpoint
 app.post("/cart/:cartId/items", async (req, res) => {
