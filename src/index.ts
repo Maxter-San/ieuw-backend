@@ -192,19 +192,36 @@ app.post("/product-last-viewed", async (req, res) => {
 // esto es un endpoint
 app.post("/cart/:cartId/items", async (req, res) => {
   try{
-    await prisma.userCartItem.create({
-      data:{
-        quantity: Number(req.body.quantity),
-        productId: Number(req.body.productId),
-        userCartId: Number(req.params.cartId),
-      }
-    });
-
+    
     const cart = await prisma.userCart.findFirst({
       where: {
         id: Number(req.params.cartId),
       },
+      include:{
+        items: true,
+      },
     });
+    const currentItem = cart?.items?.find((item) => item.id === req.body.productId);
+    if(currentItem){
+      currentItem.quantity+=req.body.quantity;
+      await prisma.userCartItem.update({
+        where:{
+          id: currentItem.id,
+        },
+        data:{
+          quantity: currentItem.quantity,
+        },
+      });
+    }else{
+      await prisma.userCartItem.create({
+        data:{
+          quantity: Number(req.body.quantity),
+          productId: Number(req.body.productId),
+          userCartId: Number(req.params.cartId),
+        }
+      });
+    }
+
 
     const updatedUser = await prisma.user.findFirst({
       where: {

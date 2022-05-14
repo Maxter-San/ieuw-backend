@@ -14,6 +14,7 @@ model Product {
   price          Float
   views          Int
   photo          String           @default("")
+  starRate       Int              @default(0)
   items          UserCartItem[]
   viewedProducts ViewedProducts[]
 }
@@ -24,6 +25,11 @@ model User {
   lastName       String
   password       String
   email          String           @unique
+
+  address        String           @default("")
+  postcode       Int              @default(0)
+  city           String           @default("")
+
   userCart       UserCart?
   viewedProducts ViewedProducts[]
   productId      Int              @default(0)

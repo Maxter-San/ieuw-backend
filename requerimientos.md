@@ -4,4 +4,4 @@
 - [x] sign up
 - [x] productos mas vendidos
 - [ ] autologin
-- [  ] cart carrito de compras
+- [x] cart carrito de compras
