@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import { idText } from "typescript";
+import sendWelcomeMail from './mailing/sendWelcomeMail';
 
 const app = express();
 app.use(cors());
@@ -124,7 +125,7 @@ app.post("/sign-up", async (req, res) => {
     // });
 
     // updatedUser?.userCart?.items
-
+    sendWelcomeMail(user);
     res.send({ user });
   } catch {
     res.status(500).send({ error: true });
