@@ -76,6 +76,18 @@ app.get("/product/:productId", async (req, res) => {
 
 app.post("/sign-up", async (req, res) => {
   try {
+    const existentUser = await prisma.user.findFirst({
+      where:{
+        email: req.body.email,
+      },
+    });
+    if(existentUser){
+      res.send({
+        error:"Email ya registrado",
+      });
+      return;
+    }
+
     const user = await prisma.user.create({
       data: {
         email: req.body.email,
@@ -113,7 +125,7 @@ app.post("/sign-up", async (req, res) => {
 
     // updatedUser?.userCart?.items
 
-    res.send(user);
+    res.send({ user });
   } catch {
     res.status(500).send({ error: true });
   }
@@ -136,8 +148,11 @@ app.post("/login", async (req, res) => {
         },
       },
     });
-    console.log(user);
-    res.send(user);
+    if(!user) {
+      res.send({error: "Usuario o contraseña incorrectos"})
+      return;
+    }
+    res.send({user});
   }catch{
     res.status(500).send({ error: true });
   }
@@ -242,6 +257,62 @@ app.post("/cart/:cartId/items", async (req, res) => {
   }
 })
 
+app.post("/users/:userId/purchases", async (req, res) => {
+  try {
+    const user = await prisma.user.findFirst({
+      where:{
+        id: Number(req.params.userId),
+      },
+      include:{
+        userCart:{
+           include: {
+            items: {
+              include: {
+                product: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      res.sendStatus(404);
+      return;
+    }
+
+    if (user.userCart?.items.length === 0) {
+      res.send({ error: 'No se puede realizar una compra sin productos' });
+    }
+
+    const purchase = await prisma.purchase.create({
+      data:{
+        userId: user.id,
+        items: {
+          // create: [
+          //   { quantity: 1, productId: 1, price: 123 },
+          //   { quantity: 1, productId: 2, price: 456 },
+          //   { quantity: 1, productId: 3, price: 789 },
+          // ],
+          create: user.userCart?.items.map((item) => {
+            return {
+              quantity: item.quantity,
+              productId: item.productId,      
+              price: item.product.price,
+            };
+          }),
+        },
+      },
+      include: {
+        items: true,
+      },
+    });
+
+    res.send({ purchase });
+  } catch {
+    res.status(500).send({ error: true });
+  }
+})
 
 app.listen(3000, () => {
   console.log("si");
