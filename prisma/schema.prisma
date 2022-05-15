@@ -7,6 +7,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  image    String
+  products Product[]
+}
+
 model Product {
   id             Int              @id @default(autoincrement())
   name           String
@@ -18,19 +25,21 @@ model Product {
   items          UserCartItem[]
   purchaseItem   PurchaseItem[]
   viewedProducts ViewedProducts[]
+  category       Category         @relation(fields: [categoryId], references: [id])
+  categoryId     Int              @default(0)
   salable        Boolean          @default(true)
 }
 
 model User {
-  id             Int              @id @default(autoincrement())
-  name           String
-  lastName       String
-  password       String
-  email          String           @unique
+  id       Int    @id @default(autoincrement())
+  name     String
+  lastName String
+  password String
+  email    String @unique
 
-  address        String           @default("")
-  postcode       Int              @default(0)
-  city           String           @default("")
+  address  String @default("")
+  postcode Int    @default(0)
+  city     String @default("")
 
   userCart       UserCart?
   viewedProducts ViewedProducts[]
@@ -64,20 +73,20 @@ model UserCartItem {
 }
 
 model Purchase {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
-  userId Int  @unique
-  items PurchaseItem[]
+  id     Int            @id @default(autoincrement())
+  user   User           @relation(fields: [userId], references: [id])
+  userId Int            @unique
+  items  PurchaseItem[]
 }
 
 model PurchaseItem {
-  id         Int      @id @default(autoincrement())
-  purchase   Purchase @relation(fields: [userPurchaseId], references: [id])
+  id             Int      @id @default(autoincrement())
+  purchase       Purchase @relation(fields: [userPurchaseId], references: [id])
   userPurchaseId Int
-  product    Product  @relation(fields: [productId], references: [id])
-  productId  Int
-  quantity   Int
-  price      Float
+  product        Product  @relation(fields: [productId], references: [id])
+  productId      Int
+  quantity       Int
+  price          Float
 }
 
 //npx prisma format

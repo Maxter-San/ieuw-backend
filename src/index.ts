@@ -13,7 +13,8 @@ const prisma = new PrismaClient({log: ['query']});
 
 app.get("/products", async (req, res) => {
   const sortByViews = req.query.sortByViews;
-  const limit = Number(req.query.limit) || undefined;
+  //const limit = Number(req.query.limit) || undefined;
+  const limit = 3;
   console.log(sortByViews);
 
   const products = await prisma.product.findMany({
@@ -31,7 +32,7 @@ app.post("/productsViewed", async (req, res) => {
 
     const products = await prisma.product.findMany({
       orderBy: {
-        id: 'desc',
+        id: 'desc' as any,
       },
       take: 3,
       where: {
@@ -44,7 +45,22 @@ app.post("/productsViewed", async (req, res) => {
         },
       },
     });
-    res.send(products);
+
+    const productsV = await prisma.viewedProducts.findMany({
+      where: {       
+        userId: Number(req.body.userId),      
+      },
+      orderBy: {
+        id: 'desc'
+      },
+      take: 3,
+      select: {
+        product: true,
+      },
+    });
+
+
+    res.send(productsV);
   }
   catch{
     res.status(500).send({ error: true });
