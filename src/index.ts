@@ -11,6 +11,17 @@ app.use(bodyParser.json());
 
 const prisma = new PrismaClient({log: ['query']});
 
+app.get("/loggedUser/:userId", async (req, res) => {
+  const userId = req.params.userId;
+
+  const loggedUser = await prisma.user.findFirst({
+    where: {
+      id: Number(userId),
+    },
+  });
+  res.send(loggedUser);
+})
+
 app.get("/products", async (req, res) => {
   const sortByViews = req.query.sortByViews;
   //const limit = Number(req.query.limit) || undefined;
@@ -40,27 +51,27 @@ app.post("/productsViewed", async (req, res) => {
           some: {
             user: {
               id: Number(req.body.userId),
-            }
+            },
           },
         },
       },
     });
 
-    const productsV = await prisma.viewedProducts.findMany({
-      where: {       
-        userId: Number(req.body.userId),      
-      },
-      orderBy: {
-        id: 'desc'
-      },
-      take: 3,
-      select: {
-        product: true,
-      },
-    });
+    //const productsV = await prisma.viewedProducts.findMany({
+    //  where: {       
+    //    userId: Number(req.body.userId),      
+    //  },
+    //  orderBy: {
+    //    id: 'desc'
+    //  },
+    //  take: 3,
+    //  select: {
+    //    product: true,
+    //  },
+    //});
 
 
-    res.send(productsV);
+    res.send(products);
   }
   catch{
     res.status(500).send({ error: true });
@@ -194,14 +205,14 @@ app.post("/product-view", async (req, res) => {
 
 app.post("/product-last-viewed", async (req, res) => {
   try {
-    // await prisma.user.update({
-    //   where:{
-    //     id: Number(req.body.userId),
-    //   },
-    //   data: {
-    //     productId: Number(req.body.productId),
-    //   }
-    // });
+    //await prisma.user.update({
+    //  where:{
+    //    id: Number(req.body.userId),
+    //  },
+    //  data: {
+    //    productId: Number(req.body.productId),
+    //  }
+    //});
     
     await prisma.viewedProducts.create({
       data:{
