@@ -18,6 +18,18 @@ app.get("/loggedUser/:userId", async (req, res) => {
     where: {
       id: Number(userId),
     },
+    include: {
+      userCart: {
+        include: {
+          items: true,
+        },
+      },
+      purcharse: {
+        include: {
+          items: true,
+        },
+      },
+    },
   });
   res.send(loggedUser);
 })
