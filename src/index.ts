@@ -35,14 +35,11 @@ app.get("/loggedUser/:userId", async (req, res) => {
 })
 
 app.get("/products", async (req, res) => {
-  const sortByViews = req.query.sortByViews;
-  //const limit = Number(req.query.limit) || undefined;
-  const limit = 3;
-  console.log(sortByViews);
+  const limit = Number(req.query.limit) || undefined;
 
   const products = await prisma.product.findMany({
     orderBy: {
-      views: sortByViews as any,
+      views: 'desc',
     },
     take: limit,
   });
@@ -57,7 +54,7 @@ app.post("/productsViewed", async (req, res) => {
       orderBy: {
         id: 'desc' as any,
       },
-      take: 3,
+      take: Number(req.body.limit),
       where: {
         viewedProducts: {
           some: {
