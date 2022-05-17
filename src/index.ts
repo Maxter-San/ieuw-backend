@@ -253,16 +253,16 @@ app.post("/cart/:cartId/items", async (req, res) => {
         items: true,
       },
     });
-    const currentItem = cart?.items?.find((item) => item.id === req.body.productId);
+
+    const currentItem = cart?.items?.find((item) => item.productId === Number(req.body.productId));
     
     if(currentItem){
-      currentItem.quantity+=req.body.quantity;
       await prisma.userCartItem.update({
         where:{
           id: currentItem.id,
         },
         data:{
-          quantity: currentItem.quantity,
+          quantity: Number(req.body.quantity),
         },
       });
     }else{
@@ -273,7 +273,21 @@ app.post("/cart/:cartId/items", async (req, res) => {
           userCartId: Number(req.params.cartId),
         }
       });
-    }
+    };
+
+   // await prisma.userCartItem.upsert({
+   //   where:{
+   //     id: Number(req.body.cartProductId),
+   //   },
+   //   update:{
+   //     quantity: Number(req.body.quantity),
+   //   },
+   //   create:{
+   //     quantity: Number(req.body.quantity),
+   //     productId: Number(req.body.productId),
+   //     userCartId: Number(req.params.cartId),
+   //   }
+   // });
 
 
     const updatedUser = await prisma.user.findFirst({
@@ -293,8 +307,48 @@ app.post("/cart/:cartId/items", async (req, res) => {
   } catch{
     res.status(500).send({ error: true });
   }
-})
+}) //crear o editar producto del carrito de compras
 
+app.post("/cart/:cartId/delete", async (req, res) => {
+  try{
+    
+    const cart = await prisma.userCart.findFirst({
+      where: {
+        id: Number(req.params.cartId),
+      },
+      include:{
+        items: true,
+      },
+    });
+
+    const currentItem = cart?.items?.find((item) => item.productId === Number(req.body.productId));
+    
+    if(currentItem){
+      await prisma.userCartItem.delete({
+        where:{
+          id: currentItem.id,
+        },
+      });
+    };
+
+    const updatedUser = await prisma.user.findFirst({
+      where: {
+        id: cart?.userId,
+      },
+      include: {
+        userCart: {
+          include: {
+            items: true,
+          },
+        },
+      },
+    });
+
+    res.send(updatedUser);
+  } catch{
+    res.status(500).send({ error: true });
+  }
+})
 
 app.get("/cart/:cartId", async (req, res) => {
     const products = await prisma.userCartItem.findMany({
@@ -316,7 +370,7 @@ app.get("/cart/:cartId", async (req, res) => {
     });
 
     res.send({ products });
-})
+}) //Buscar productos del carrito de compras
 
 app.post("/users/:userId/purchases", async (req, res) => {
   try {
