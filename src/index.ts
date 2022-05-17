@@ -11,106 +11,7 @@ app.use(bodyParser.json());
 
 const prisma = new PrismaClient({log: ['query']});
 
-app.get("/loggedUser/:userId", async (req, res) => {
-  const userId = req.params.userId;
-
-  const loggedUser = await prisma.user.findFirst({
-    where: {
-      id: Number(userId),
-    },
-    include: {
-      userCart: {
-        include: {
-          items: true,
-        },
-      },
-      purcharse: {
-        include: {
-          items: true,
-        },
-      },
-    },
-  });
-  res.send(loggedUser);
-})
-
-app.get("/products", async (req, res) => {
-  const limit = Number(req.query.limit) || undefined;
-
-  const products = await prisma.product.findMany({
-    orderBy: {
-      views: 'desc',
-    },
-    take: limit,
-  });
-  res.send(products);
-})
-
-app.post("/productsViewed", async (req, res) => {
-  try{
-    //const limit = Number(req.query.limit) || undefined;
-
-    const products = await prisma.product.findMany({
-      orderBy: {
-        id: 'desc' as any,
-      },
-      take: Number(req.body.limit),
-      where: {
-        viewedProducts: {
-          some: {
-            user: {
-              id: Number(req.body.userId),
-            },
-          },
-        },
-      },
-    });
-
-    //const productsV = await prisma.viewedProducts.findMany({
-    //  where: {       
-    //    userId: Number(req.body.userId),      
-    //  },
-    //  orderBy: {
-    //    id: 'desc'
-    //  },
-    //  take: 3,
-    //  select: {
-    //    product: true,
-    //  },
-    //});
-
-
-    res.send(products);
-  }
-  catch{
-    res.status(500).send({ error: true });
-  }
-})
-
-app.post("/productViewed", async (req, res) => {
-  try{
-    const product = await prisma.product.findMany({
-      where: {
-        id: Number(req.body.productId),
-      },
-    });
-
-    res.send(product);
-  }
-  catch{
-    res.status(500).send({ error: true });
-  }
-})
-
-app.get("/product/:productId", async (req, res) => {
-  const product = await prisma.product.findFirst({
-    where:{
-      id: Number(req.params.productId),
-    }
-  });
-  res.send(product);
-})
-
+// esto es un endpoint
 app.post("/sign-up", async (req, res) => {
   try {
     const existentUser = await prisma.user.findFirst({
@@ -168,8 +69,6 @@ app.post("/sign-up", async (req, res) => {
   }
 })
 
-//crud patch
-
 app.post("/login", async (req, res) => {
   try{
     const user = await prisma.user.findFirst({
@@ -178,13 +77,14 @@ app.post("/login", async (req, res) => {
         password: req.body.password,
       },
       include: {
-        userCart: {
-          include: {
+        userCart:{
+          include:{
             items: true,
           },
         },
       },
     });
+    user?.userCart?.id
     if(!user) {
       res.send({error: "Usuario o contraseña incorrectos"})
       return;
@@ -194,6 +94,91 @@ app.post("/login", async (req, res) => {
     res.status(500).send({ error: true });
   }
 })
+
+app.get("/loggedUser/:userId", async (req, res) => {
+  const userId = req.params.userId;
+
+  const loggedUser = await prisma.user.findFirst({
+    where: {
+      id: Number(userId),
+    },
+    include: {
+      userCart: {
+        include: {
+          items: true,
+        },
+      },
+      purcharse: {
+        include: {
+          items: true,
+        },
+      },
+    },
+  });
+  res.send(loggedUser);
+})
+
+app.get("/product/:productId", async (req, res) => {
+  const product = await prisma.product.findFirst({
+    where:{
+      id: Number(req.params.productId),
+    }
+  });
+  res.send(product);
+})
+
+app.get("/products", async (req, res) => {
+  const limit = Number(req.query.limit) || undefined;
+
+  const products = await prisma.product.findMany({
+    orderBy: {
+      views: 'desc',
+    },
+    take: limit,
+  });
+  res.send(products);
+}) //Muestra los productos mas vistos
+
+app.post("/productsViewed", async (req, res) => {
+  try{
+    //const limit = Number(req.query.limit) || undefined;
+
+    const products = await prisma.product.findMany({
+      orderBy: {
+        id: 'desc' as any,
+      },
+      take: Number(req.body.limit),
+      where: {
+        viewedProducts: {
+          some: {
+            user: {
+              id: Number(req.body.userId),
+            },
+          },
+        },
+      },
+    });
+
+    //const productsV = await prisma.viewedProducts.findMany({
+    //  where: {       
+    //    userId: Number(req.body.userId),      
+    //  },
+    //  orderBy: {
+    //    id: 'desc'
+    //  },
+    //  take: 3,
+    //  select: {
+    //    product: true,
+    //  },
+    //});
+
+
+    res.send(products);
+  }
+  catch{
+    res.status(500).send({ error: true });
+  }
+}) //Muestra los productos vistos por el usuario
 
 app.post("/product-view", async (req, res) => {
   try {
@@ -208,6 +193,21 @@ app.post("/product-view", async (req, res) => {
   
     res.send({ ok: true });
   } catch {
+    res.status(500).send({ error: true });
+  }
+}) //Aumenta los views
+
+app.post("/productViewed", async (req, res) => {
+  try{
+    const product = await prisma.product.findMany({
+      where: {
+        id: Number(req.body.productId),
+      },
+    });
+
+    res.send(product);
+  }
+  catch{
     res.status(500).send({ error: true });
   }
 })
@@ -240,8 +240,8 @@ app.post("/product-last-viewed", async (req, res) => {
   }
 })
 
+//crud patch
 
-// esto es un endpoint
 app.post("/cart/:cartId/items", async (req, res) => {
   try{
     
@@ -254,6 +254,7 @@ app.post("/cart/:cartId/items", async (req, res) => {
       },
     });
     const currentItem = cart?.items?.find((item) => item.id === req.body.productId);
+    
     if(currentItem){
       currentItem.quantity+=req.body.quantity;
       await prisma.userCartItem.update({
@@ -292,6 +293,29 @@ app.post("/cart/:cartId/items", async (req, res) => {
   } catch{
     res.status(500).send({ error: true });
   }
+})
+
+
+app.get("/cart/:cartId", async (req, res) => {
+    const products = await prisma.userCartItem.findMany({
+      // select:{
+      //   items:{
+      //     where: {
+      //       userCartId: Number(req.params.cartId),
+      //     },
+      //   },
+      // }
+
+      where: {
+        userCartId: Number(req.params.cartId),
+      },
+      include: {
+        product: true,
+      },
+      
+    });
+
+    res.send({ products });
 })
 
 app.post("/users/:userId/purchases", async (req, res) => {
