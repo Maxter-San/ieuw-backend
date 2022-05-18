@@ -132,7 +132,7 @@ app.get("/products", async (req, res) => {
 
   const products = await prisma.product.findMany({
     orderBy: {
-      views: 'desc',
+      views: req.query.viewsSort ? req.query.viewsSort as any : undefined,
     },
     take: limit,
   });
@@ -398,11 +398,12 @@ app.post("/users/:userId/purchases", async (req, res) => {
 
     if (user.userCart?.items.length === 0) {
       res.send({ error: 'No se puede realizar una compra sin productos' });
+      return;
     }
 
     const purchase = await prisma.purchase.create({
       data:{
-        userId: user.id,
+        userId: Number(user.id),
         items: {
           // create: [
           //   { quantity: 1, productId: 1, price: 123 },
@@ -423,8 +424,30 @@ app.post("/users/:userId/purchases", async (req, res) => {
       },
     });
 
-    res.send({ purchase });
-  } catch {
+    await prisma.userCartItem.deleteMany({
+      where: {
+        userCartId: Number(user.userCart?.id),
+      },
+    })
+
+    const updatedUser = await prisma.user.findFirst({
+      where: {
+        id: Number(req.params.userId),
+      },
+      include: {
+        userCart: {
+          include: {
+            items: true,
+          },
+        },
+      },
+    });
+
+    res.send(updatedUser);
+
+
+  } catch(error) {
+    console.error(error);
     res.status(500).send({ error: true });
   }
 })

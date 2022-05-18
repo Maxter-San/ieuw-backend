@@ -36,7 +36,7 @@ model User {
   lastName String
   password String
   email    String @unique
-
+  card     String @default("")
   address  String @default("")
   postcode Int    @default(0)
   city     String @default("")
@@ -75,7 +75,7 @@ model UserCartItem {
 model Purchase {
   id     Int            @id @default(autoincrement())
   user   User           @relation(fields: [userId], references: [id])
-  userId Int            @unique
+  userId Int
   items  PurchaseItem[]
 }
 
