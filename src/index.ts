@@ -82,6 +82,16 @@ app.post("/login", async (req, res) => {
             items: true,
           },
         },
+        viewedProducts: {
+          include: {
+            product:true,
+          },
+        },
+        purcharse: {
+          include: {
+            items: true,
+          },
+        },
       },
     });
     user?.userCart?.id
