@@ -130,15 +130,32 @@ app.get("/product/:productId", async (req, res) => {
 app.get("/products", async (req, res) => {
   const limit = Number(req.query.limit) || undefined;
 
-  const products = await prisma.product.findMany({
-    where: {
+  const conditions = [];
+
+  if (req.query.search) {
+    conditions.push({
       description: {
         contains: req.query.search as any || undefined,
       },
+    });
+  }
+  if (req.query.search) {
+    conditions.push({
       name: {
         contains: req.query.search as any || undefined,
       },
-      categoryId: req.query.category as any || undefined,
+    })
+  }
+  
+  if (req.query.category) {
+    conditions.push({
+      categoryId: Number(req.query.category) || undefined,
+    })
+  }
+
+  const products = await prisma.product.findMany({
+    where: {
+      OR: conditions.length ? conditions : undefined,
     },
     orderBy: {
       views: req.query.viewsSort as any || undefined,
@@ -459,6 +476,12 @@ app.post("/users/:userId/purchases", async (req, res) => {
     console.error(error);
     res.status(500).send({ error: true });
   }
+})
+
+app.get("/categories", async (req, res) => {
+  const categories = await prisma.category.findMany();
+
+  res.send(categories);
 })
 
 app.listen(3000, () => {
