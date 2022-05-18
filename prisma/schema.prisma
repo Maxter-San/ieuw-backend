@@ -21,7 +21,6 @@ model Product {
   price          Float
   views          Int
   photo          String           @default("")
-  starRate       Int              @default(0)
   items          UserCartItem[]
   purchaseItem   PurchaseItem[]
   viewedProducts ViewedProducts[]

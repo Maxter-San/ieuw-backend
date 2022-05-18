@@ -131,8 +131,17 @@ app.get("/products", async (req, res) => {
   const limit = Number(req.query.limit) || undefined;
 
   const products = await prisma.product.findMany({
+    where: {
+      description: {
+        contains: req.query.search as any || undefined,
+      },
+      name: {
+        contains: req.query.search as any || undefined,
+      },
+      categoryId: req.query.category as any || undefined,
+    },
     orderBy: {
-      views: req.query.viewsSort ? req.query.viewsSort as any : undefined,
+      views: req.query.viewsSort as any || undefined,
     },
     take: limit,
   });
