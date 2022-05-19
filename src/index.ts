@@ -106,6 +106,46 @@ app.post("/login", async (req, res) => {
   }
 })
 
+app.post("/myProfile", async (req, res) => {
+  try{
+    const user = await prisma.user.update({
+      where: {
+        id: req.body.userId,
+      },
+      data: {
+        name: req.body.name,
+        lastName: req.body.lastName,
+        password: req.body.password,
+        card: req.body.card,
+        address: req.body.address,
+        postcode: req.body.postcode,
+        city: req.body.city,
+      },
+      include: {
+        userCart:{
+          include:{
+            items: true,
+          },
+        },
+        viewedProducts: {
+          include: {
+            product:true,
+          },
+        },
+        purcharse: {
+          include: {
+            items: true,
+          },
+        },
+      },
+    })
+
+    res.send({user});
+  }catch{
+    res.send({error: "Error inesperado"})
+  }
+})
+
 app.get("/loggedUser/:userId", async (req, res) => {
   const userId = req.params.userId;
 
