@@ -184,13 +184,13 @@ app.get("/products", async (req, res) => {
   const conditions = [];
   const inCategory = [];
   
-  if (req.query.search) {
-    conditions.push({
-      description: {
-        contains: req.query.search as any || undefined,
-      },
-    });
-  }
+  // if (req.query.search) {
+  //   conditions.push({
+  //     description: {
+  //       contains: req.query.search as any || undefined,
+  //     },
+  //   });
+  // }
   if (req.query.search) {
     conditions.push({
       name: {
@@ -198,7 +198,6 @@ app.get("/products", async (req, res) => {
       },
     })
   }
-
 
   
   if (req.query.categoryId) {
