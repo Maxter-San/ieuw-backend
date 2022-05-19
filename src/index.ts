@@ -68,7 +68,7 @@ app.post("/sign-up", async (req, res) => {
   } catch {
     res.status(500).send({ error: true });
   }
-})
+}) //crear usuario
 
 app.post("/login", async (req, res) => {
   try{
@@ -104,7 +104,7 @@ app.post("/login", async (req, res) => {
   }catch{
     res.status(500).send({ error: true });
   }
-})
+}) //login
 
 app.post("/myProfile", async (req, res) => {
   try{
@@ -144,7 +144,7 @@ app.post("/myProfile", async (req, res) => {
   }catch{
     res.send({error: "Error inesperado"})
   }
-})
+}) //editar informacion de usuario
 
 app.get("/loggedUser/:userId", async (req, res) => {
   const userId = req.params.userId;
@@ -167,7 +167,7 @@ app.get("/loggedUser/:userId", async (req, res) => {
     },
   });
   res.send(loggedUser);
-})
+}) //buscar usuario loggeado
 
 app.get("/product/:productId", async (req, res) => {
   const product = await prisma.product.findFirst({
@@ -176,7 +176,7 @@ app.get("/product/:productId", async (req, res) => {
     }
   });
   res.send(product);
-})
+}) //Buscar un producto
 
 app.get("/products", async (req, res) => {
   const limit = Number(req.query.limit) || undefined;
@@ -320,7 +320,7 @@ app.post("/product-last-viewed", async (req, res) => {
   } catch {
     res.status(500).send({ error: true });
   }
-})
+}) //crea un historial
 
 //crud patch
 
@@ -485,7 +485,7 @@ app.post("/cart/:cartId/delete", async (req, res) => {
   } catch{
     res.status(500).send({ error: true });
   }
-})
+}) //borra un producto del carrito de compras
 
 app.get("/cart/:cartId", async (req, res) => {
     const products = await prisma.userCartItem.findMany({
@@ -587,13 +587,43 @@ app.post("/users/:userId/purchases", async (req, res) => {
     console.error(error);
     res.status(500).send({ error: true });
   }
-})
+}) //Busca usuario incluye su carrito
 
 app.get("/categories", async (req, res) => {
   const categories = await prisma.category.findMany();
 
   res.send(categories);
-})
+}) //muestra las categorias
+
+app.get("/purchases/:userId", async (req, res) => {
+  try {
+    const purcharses = await prisma.purchase.findMany({
+      where:{
+        userId: Number(req.params.userId),
+      },
+      include:{
+        items:{
+          include:{
+            product: true,  
+          },
+        },
+      },
+    });
+
+    if (!purcharses) {
+      res.sendStatus(404);
+      return;
+    }
+
+    res.send(purcharses);
+
+  } catch(error) {
+    console.error(error);
+    res.status(500).send({ error: true });
+  }
+}) //Busca usuario incluye su historial de compras
+
+
 
 app.listen(3000, () => {
   console.log("si");
