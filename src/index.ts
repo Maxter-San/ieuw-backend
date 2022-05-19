@@ -4,6 +4,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import { idText } from "typescript";
 import sendWelcomeMail from './mailing/sendWelcomeMail';
+import { debug } from "console";
 
 const app = express();
 app.use(cors());
@@ -141,7 +142,8 @@ app.get("/products", async (req, res) => {
   const limit = Number(req.query.limit) || undefined;
 
   const conditions = [];
-
+  const inCategory = [];
+  
   if (req.query.search) {
     conditions.push({
       description: {
@@ -156,19 +158,23 @@ app.get("/products", async (req, res) => {
       },
     })
   }
+
+
   
-  if (req.query.category) {
-    conditions.push({
-      categoryId: Number(req.query.category) || undefined,
+  if (req.query.categoryId) {
+    inCategory.push({
+      categoryId: Number(req.query.categoryId) || undefined,
     })
   }
 
+  
   const products = await prisma.product.findMany({
     where: {
       OR: conditions.length ? conditions : undefined,
+      AND: inCategory.length ? inCategory : undefined,
     },
     orderBy: {
-      views: Number(req.query.viewsSort) as any || undefined,
+      views: req.query.viewsSort as any || undefined,
     },
     take: limit,
   });
