@@ -168,12 +168,12 @@ app.get("/products", async (req, res) => {
       OR: conditions.length ? conditions : undefined,
     },
     orderBy: {
-      views: req.query.viewsSort as any || undefined,
+      views: Number(req.query.viewsSort) as any || undefined,
     },
     take: limit,
   });
   res.send(products);
-}) //Muestra los productos mas vistos
+}) //Muestra los productos con o sin filtro
 
 app.post("/productsViewed", async (req, res) => {
   try{
@@ -298,7 +298,9 @@ app.post("/cart/:cartId/items", async (req, res) => {
           id: currentItem.id,
         },
         data:{
-          quantity: Number(req.body.quantity),
+          quantity: {
+            increment: Number(req.body.quantity),
+          },
         },
       });
     }else{
@@ -343,7 +345,60 @@ app.post("/cart/:cartId/items", async (req, res) => {
   } catch{
     res.status(500).send({ error: true });
   }
-}) //crear o editar producto del carrito de compras
+}) //crear o aumenta un producto del carrito de compras
+
+app.post("/cart/:cartId/update", async (req, res) => {
+  try{
+    
+    const cart = await prisma.userCart.findFirst({
+      where: {
+        id: Number(req.params.cartId),
+      },
+      include:{
+        items: true,
+      },
+    });
+
+    const currentItem = cart?.items?.find((item) => item.productId === Number(req.body.productId));
+    
+    if(currentItem){
+      await prisma.userCartItem.update({
+        where:{
+          id: currentItem.id,
+        },
+        data:{
+          quantity: Number(req.body.quantity),
+        },
+      });
+    }else{
+      await prisma.userCartItem.create({
+        data:{
+          quantity: Number(req.body.quantity),
+          productId: Number(req.body.productId),
+          userCartId: Number(req.params.cartId),
+        }
+      });
+    };
+
+    const updatedUser = await prisma.user.findFirst({
+      where: {
+        id: cart?.userId,
+      },
+      include: {
+        userCart: {
+          include: {
+            items: true,
+          },
+        },
+      },
+    });
+
+    res.send(updatedUser);
+  } catch{
+    res.status(500).send({ error: true });
+  }
+}) //edita la cantidad de un producto del carrito de compras
+
 
 app.post("/cart/:cartId/delete", async (req, res) => {
   try{
