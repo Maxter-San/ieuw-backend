@@ -16,7 +16,7 @@ export default async function sendWelcomeMail(user: User) {
   await transporter.sendMail({
     from: 'chiguas5000@gmail.com',
     to: user.email,
-    subject: `Bienvenido`,
-    html: `<p>bienvenido ${user.name} a nuestra plataforma :)</p>`,
+    subject: `Adosa`,
+    html: `<p>Bienvenido/a ${user.name} a nuestra plataforma :)</p>`,
   })
 }
