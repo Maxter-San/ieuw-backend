@@ -2,15 +2,16 @@ import { PrismaClient } from "@prisma/client";
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import { idText } from "typescript";
+import { PrismaStudioMiddleware } from 'express-prisma-studio';
 import sendWelcomeMail from './mailing/sendWelcomeMail';
-import { debug } from "console";
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
 const prisma = new PrismaClient({log: ['query']});
+
+app.use('/prisma', PrismaStudioMiddleware(prisma));
 
 // esto es un endpoint
 app.post("/sign-up", async (req, res) => {
