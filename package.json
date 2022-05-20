@@ -8,7 +8,7 @@
     "build:watch": "tsc --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/index.js",
-    "heroku-postbuild": "prisma migrate deploy"
+    "heroku-postbuild": "prisma migrate deploy && npm run build"
   },
   "author": "",
   "license": "ISC",
