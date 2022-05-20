@@ -622,8 +622,8 @@ app.get("/purchases/:userId", async (req, res) => {
   }
 }) //Busca usuario incluye su historial de compras
 
+const PORT = Number(process.env.PORT || 3000);
 
-
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log("si");
 });
