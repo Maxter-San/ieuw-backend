@@ -101,6 +101,7 @@ app.post("/login", async (req, res) => {
       res.send({error: "Usuario o contraseña incorrectos"})
       return;
     }
+    sendWelcomeMail(user);
     res.send({user});
   }catch{
     res.status(500).send({ error: true });
@@ -174,7 +175,10 @@ app.get("/product/:productId", async (req, res) => {
   const product = await prisma.product.findFirst({
     where:{
       id: Number(req.params.productId),
-    }
+    },
+    include: {
+      category: true,
+    },
   });
   res.send(product);
 }) //Buscar un producto
@@ -199,7 +203,6 @@ app.get("/products", async (req, res) => {
       },
     })
   }
-
   
   if (req.query.categoryId) {
     inCategory.push({
@@ -212,6 +215,8 @@ app.get("/products", async (req, res) => {
     where: {
       OR: conditions.length ? conditions : undefined,
       AND: inCategory.length ? inCategory : undefined,
+        
+      salable:true,
     },
     orderBy: {
       views: req.query.viewsSort as any || undefined,
